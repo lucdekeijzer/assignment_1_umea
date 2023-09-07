@@ -1,0 +1,10 @@
+"configurations": [
+    {
+        "name": "Python: pacman.py",
+        "type": "python",
+        "request": "launch",
+        "program": "pacman.py",
+        "args": ["-1", "tinyMaze", "-p", "SearchAgent"],
+        
+    }
+]
