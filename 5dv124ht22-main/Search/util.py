@@ -152,6 +152,9 @@ class Queue:
     def __init__(self):
         self.list = []
 
+    def print(self):
+        print(self.list)
+
     def push(self,item):
         "Enqueue the 'item' into the queue"
         self.list.insert(0,item)
