@@ -72,7 +72,7 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-def depthFirstSearch_2(problem: SearchProblem):
+def depthFirstSearch(problem: SearchProblem):
     """
     Search the deepest nodes in the search tree first.
 
@@ -90,40 +90,38 @@ def depthFirstSearch_2(problem: SearchProblem):
 
     """
     "*** YOUR CODE HERE ***"
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    print("Successor test", problem.getSuccessors((5,4)))
-    next_node = problem.getSuccessors(problem.getStartState())
-    visited = util.Queue()
-    fringe = util.Queue()
-    visited.push(problem.getStartState())
-    next_node = problem.getSuccessors(problem.getStartState())
+    # Instantiate stack, the directions list, the visited coordinates list and the cost (used in later algorithms)
+    fringe = util.Stack()
+    dir = []
+    visited = []
+    cost = 0
 
-    # Adding all the possible next coordinate states in the to do list
-    for i in range(len(next_node)):
-        fringe.push(next_node[i][0])
+    # Add start node to stack
+    start_node = problem.getStartState()
+    fringe.push((start_node, dir, cost))    
 
-    for i in fringe.list:
-        print(i)
-    # current_state = (x,y)
-    # problem.getSuccessors(current_state)
+    # While the fringe is not empty, take an element out of the fringe (depending on the strategy)
+    while not fringe.isEmpty():
+        curr_node, dir, cost  = fringe.pop()
 
-    # Printing next direction change
-    for i in range(len(next_node)):
-        print(f"Next direction: {i}, {next_node[i][1]=}")
+        # Check if that node is the goal state, if it is, we can stop the search and return the directions
+        if problem.isGoalState(curr_node):
+            print(f"End dir: {dir=}")
+            return dir
+        
+        # Else, we will add the current node coordinates to the visited coordinates list for future reference
+        else:
+            visited.append(curr_node)
 
-    # Printing next coordinates
-    for i in range(len(next_node)):
-        print(f"Next coordinates (state): {i}, {next_node[i][0]=}")
-    
+        # The next nodes will be determined by calling the getSuccesors method on the current node.
+        # If the next node's coordinates are not yet visited, we will push them into the fringe.
+        next_nodes = problem.getSuccessors(curr_node)
+        for node, next_dir, cost in next_nodes:
+            if node not in visited:
+                fringe.push((node, dir + [next_dir], cost))
 
-    #util.raiseNotDefined()
-    from game import Directions
-    s = Directions.SOUTH
-    w = Directions.WEST
-    n = Directions.NORTH
-    e = Directions.EAST
+    # if all else fails, we return None
+    return None
 
 
 
@@ -132,12 +130,75 @@ def depthFirstSearch_2(problem: SearchProblem):
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Instantiate stack, the directions list, the visited coordinates list and the cost (used in later algorithms)
+    fringe = util.Queue()
+    dir = []
+    visited = []
+    cost = 0
+
+    # Add start node to stack
+    start_node = problem.getStartState()
+    fringe.push((start_node, dir, cost))    
+
+    # While the fringe is not empty, take an element out of the fringe (depending on the strategy)
+    while not fringe.isEmpty():
+        curr_node, dir, cost  = fringe.pop()
+
+        # Check if that node is the goal state, if it is, we can stop the search and return the directions
+        if problem.isGoalState(curr_node):
+            print(f"End dir: {dir=}")
+            return dir
+        
+        # Else, we will add the current node coordinates to the visited coordinates list for future reference
+        else:
+            visited.append(curr_node)
+
+        # The next nodes will be determined by calling the getSuccesors method on the current node.
+        # If the next node's coordinates are not yet visited, we will push them into the fringe.
+        next_nodes = problem.getSuccessors(curr_node)
+        for node, next_dir, cost in next_nodes:
+            if node not in visited:
+                fringe.push((node, dir + [next_dir], cost))
+
+    # if all else fails, we return None
+    return None
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    # Instantiate stack, the directions list, the visited coordinates list and the cost (used in later algorithms)
+    fringe = util.PriorityQueue()
+    dir = []
+    visited = []
+    cost = 0
+
+    # Add start node to stack
+    start_node = problem.getStartState()
+    fringe.update((start_node, dir), cost)    
+
+    # While the fringe is not empty, take an element out of the fringe (depending on the strategy)
+    while not fringe.isEmpty():
+        curr_node, dir  = fringe.pop()
+
+        # Check if that node is the goal state, if it is, we can stop the search and return the directions
+        if problem.isGoalState(curr_node):
+            print(f"End dir: {dir=}")
+            return dir
+        
+        # Else, we will add the current node coordinates to the visited coordinates list for future reference
+        else:
+            visited.append(curr_node)
+
+        # The next nodes will be determined by calling the getSuccesors method on the current node.
+        # If the next node's coordinates are not yet visited, we will push them into the fringe.
+        next_nodes = problem.getSuccessors(curr_node)
+        for node, next_dir, cost in next_nodes:
+            if node not in visited:
+                fringe.update((node, dir + [next_dir]), cost)
+
+    # if all else fails, we return None
+    return None
 
 def nullHeuristic(state, problem=None):
     """
@@ -153,31 +214,39 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
 
 
 # General search algorithm based on the example in the lecture
-def depthFirstSearch(problem: SearchProblem): #BFS
-    stack = util.Stack()
-    start_node = problem.getStartState()
+def generalSearch(problem: SearchProblem):
+
+    # Instantiate stack, the directions list, the visited coordinates list and the cost (used in later algorithms)
+    fringe = util.Stack()
     dir = []
-    cost = 0
-    stack.push((start_node, dir, cost))  
-
     visited = []
+    cost = 0
 
-    while not stack.isEmpty():
-        # print(f"The stack looks like this{stack.pop()=}")
-        curr_node, dir, cost  = stack.pop()
-        print(f"{dir=}")
-        print(f"{curr_node=}")
+    # Add start node to stack
+    start_node = problem.getStartState()
+    fringe.push((start_node, dir, cost))    
+
+    # While the fringe is not empty, take an element out of the fringe (depending on the strategy)
+    while not fringe.isEmpty():
+        curr_node, dir, cost  = fringe.pop()
+
+        # Check if that node is the goal state, if it is, we can stop the search and return the directions
         if problem.isGoalState(curr_node):
             print(f"End dir: {dir=}")
             return dir
         
-        visited.append(curr_node)
+        # Else, we will add the current node coordinates to the visited coordinates list for future reference
+        else:
+            visited.append(curr_node)
 
+        # The next nodes will be determined by calling the getSuccesors method on the current node.
+        # If the next node's coordinates are not yet visited, we will push them into the fringe.
         next_nodes = problem.getSuccessors(curr_node)
         for node, next_dir, cost in next_nodes:
             if node not in visited:
-                stack.push((node, dir + [next_dir], cost))
+                fringe.push((node, dir + [next_dir], cost))
 
+    # if all else fails, we return None
     return None
 
 
