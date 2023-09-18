@@ -292,6 +292,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        
 
     def getStartState(self):
         """
@@ -299,13 +300,26 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition, [])
+        # util.raiseNotDefined()
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        current_pos = state[0]
+        visited_corners = state[1]
+        if current_pos in self.corners:
+            if current_pos not in visited_corners:
+                visited_corners.append(current_pos)
+            # Check if all the corners have been visited
+            if len(visited_corners) == 4:
+                return True
+            else:
+                return False
+        else:
+            return False
         util.raiseNotDefined()
 
     def getSuccessors(self, state: Any):
@@ -323,12 +337,21 @@ class CornersProblem(search.SearchProblem):
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
-
+            print(f"successors state: {state=}")
+            x,y = state
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            visited_corners = state[1]
             "*** YOUR CODE HERE ***"
+            if not hitsWall:
+                successors_visited_corners = list(visited_corners)
+                if (nextx, nexty) not in self.corners:
+                    if (nextx, nexty) not in successors_visited_corners:
+                        successors_visited_corners.append((nextx, nexty))
+                successors.append((((nextx, nexty), successors_visited_corners) ,action, 1 ))             
+            
+
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -364,7 +387,15 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    max_val = 0
+    current_position = state[0]
+    corners_visited = state[1]
+    for corner in corners:
+        if corner not in corners_visited:
+            heuristic = manhattanHeuristic(current_position, corner, walls)
+            if heuristic > max_val:
+                max_val = heuristic
+    return max_val # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -458,7 +489,12 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    max_val = 0
+    for food in foodGrid:
+        heuristic = manhattanHeuristic(position, food, problem.walls)
+        if heuristic > max_val:
+            max_val = heuristic
+    return max_val
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -525,7 +561,10 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if x == self.food[x]:
+            if y == self.food[y]:
+                return True
+        # util.raiseNotDefined()
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
     """
