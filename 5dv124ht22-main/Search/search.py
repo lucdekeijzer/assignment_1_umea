@@ -246,7 +246,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     # Instantiate stack, the directions list, the visited coordinates list and the cost (used in later algorithms)
-    fringe = util.PriorityQueue()
+    fringe = util.PriorityQueueWithFunction(heuristic)
     dir = []
     visited = []
     # cost = 0
@@ -278,8 +278,9 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
                 if node not in visited:
                     new_cost = cost + next_cost
                     new_dir = dir  + [next_dir]
-                    heuristic_calc = new_cost + heuristic(node, problem) 
-                    fringe.push((node, new_dir, new_cost), heuristic_calc)
+                    # heuristic_calc = new_cost + heuristic(node, problem) 
+                    # fringe.push((node, new_dir, new_cost), heuristic_calc)
+                    fringe.push((node, new_dir, new_cost), new_cost)
     # if all else fails, we return None
     return None
     

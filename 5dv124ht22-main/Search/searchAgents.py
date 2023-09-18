@@ -292,7 +292,8 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        
+        self.game_state = (self.startingPosition, [False] * len(self.corners))
+        self.visited_corners = []
 
     def getStartState(self):
         """
@@ -310,6 +311,7 @@ class CornersProblem(search.SearchProblem):
         "*** YOUR CODE HERE ***"
         current_pos = state[0]
         visited_corners = state[1]
+        print(f"Visited corners type{type(visited_corners)=}")
         if current_pos in self.corners:
             if current_pos not in visited_corners:
                 visited_corners.append(current_pos)
@@ -323,6 +325,8 @@ class CornersProblem(search.SearchProblem):
         util.raiseNotDefined()
 
     def getSuccessors(self, state: Any):
+        from copy import copy
+
         """
         Returns successor states, the actions they require, and a cost of 1.
 
@@ -338,23 +342,29 @@ class CornersProblem(search.SearchProblem):
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
             print(f"successors state: {state=}")
-            x,y = state
+            x,y = state[0]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
             visited_corners = state[1]
             "*** YOUR CODE HERE ***"
+            new_node = (nextx, nexty)
             if not hitsWall:
-                successors_visited_corners = list(visited_corners)
-                if (nextx, nexty) not in self.corners:
-                    if (nextx, nexty) not in successors_visited_corners:
-                        successors_visited_corners.append((nextx, nexty))
-                successors.append((((nextx, nexty), successors_visited_corners) ,action, 1 ))             
-            
-
+                next_corners = copy(visited_corners)
+                print(F"type list: {type(next_corners)=}")
+                if new_node not in self.corners:
+                    if new_node not in successors:
+                        next_corners + list((new_node,))
+                successors.append((((nextx, nexty), next_corners) ,action, 1 ))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
+    
+
+    # get successors:
+    # check if the (nextx, nexty) hits a wall
+    # if not, check if it is in the successors node yet
+    # if not, add the that node to the successors 
 
     def getCostOfActions(self, actions):
         """
@@ -390,9 +400,14 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     max_val = 0
     current_position = state[0]
     corners_visited = state[1]
+    corner_list = []
     for corner in corners:
         if corner not in corners_visited:
-            heuristic = manhattanHeuristic(current_position, corner, walls)
+            corner_list.append(corner)
+
+            for corner in corner_list:
+                heuristic = manhattanHeuristic(current_position, corner, walls)
+
             if heuristic > max_val:
                 max_val = heuristic
     return max_val # Default to trivial solution
