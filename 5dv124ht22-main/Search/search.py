@@ -245,44 +245,26 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    # Instantiate stack, the directions list, the visited coordinates list and the cost (used in later algorithms)
-    fringe = util.PriorityQueueWithFunction(heuristic)
-    dir = []
-    visited = []
-    # cost = 0
-
-    # Add start node to stack
-    start_node = problem.getStartState()
-    # visited.append(start_node)
-    fringe.push((start_node, dir, 0), 0)
-        
-    # While the fringe is not empty, take an element out of the fringe (depending on the strategy)
-    while not fringe.isEmpty():
-        
-        curr_node, dir, cost = fringe.pop()
-        if curr_node in visited:
-            continue
-        # dir = popped_node[1]
-        visited.append(curr_node)
-        # Check if that node is the goal state, if it is, we can stop the search and return the directions
-        if problem.isGoalState(curr_node):
-            print(f"End dir: {dir=}")
-            return dir
-        
-        # Else, we will add the current node coordinates to the visited coordinates list for future reference
-        # The next nodes will be determined by calling the getSuccesors method on the current node.
-        # If the next node's coordinates are not yet visited, we will push them into the fringe.      
-        else:
-            next_nodes = problem.getSuccessors(curr_node)
-            for node, next_dir, next_cost in next_nodes:
-                if node not in visited:
-                    new_cost = cost + next_cost
-                    new_dir = dir  + [next_dir]
-                    # heuristic_calc = new_cost + heuristic(node, problem) 
-                    # fringe.push((node, new_dir, new_cost), heuristic_calc)
-                    fringe.push((node, new_dir, new_cost), new_cost)
-    # if all else fails, we return None
-    return None
+    visited = []  
+    start_state = problem.getStartState() 
+    priorityQueue = util.PriorityQueueWithFunction(lambda item: item[2] + heuristic(item[0], problem)) 
+    priorityQueue.push((start_state, [], 0))
+    
+    if problem.isGoalState(start_state): 
+        return [] 
+     
+    while not priorityQueue.isEmpty(): 
+        current_state, path, cost = priorityQueue.pop() 
+        if current_state in visited: 
+            continue 
+        visited.append(current_state) 
+        if problem.isGoalState(current_state): 
+            return path 
+        for next_state, action, step_cost in problem.getSuccessors(current_state): 
+            if next_state not in visited: new_cost = cost + step_cost 
+            new_path = path + [action] 
+            priorityQueue.push((next_state, new_path, new_cost))
+    return []
     
 
 """ THIS IS THE TEMPLATE TO USE FOR ANY OF THE SEARCH ALGORITHMS USED IN THIS ASSIGNMENT"""
